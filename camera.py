@@ -4,6 +4,7 @@ from detect import detect
 import requests
 import time
 import sys
+from playsound import playsound
 
 def post_image(url, token, private, img_name, without_amount, total):
     data = {
@@ -67,6 +68,9 @@ if __name__ == '__main__':
             without_amount, total = detect(frame, save, model, device, img_size, conf, iou)
             if without_amount > 0:
                 current = time.time()
+                playsound('./results/chinese.wav')
+                playsound('./results/taiwanese.wav')
+                playsound('./results/english.mp3')
                 if current - send_time >= POST:
                     post_image(URL, TOKEN, private, 'result', without_amount, total)
                     send_time = current
