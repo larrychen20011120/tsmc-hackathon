@@ -10,7 +10,7 @@ from utils.general import check_img_size, non_max_suppression, scale_coords
 from utils.plots import plot_one_box, color_list
 from utils.torch_utils import select_device
 
-def detect(img, save_dir, model, device, imgsz, conf_thres = 0.25, iou_thres = 0.45):
+def detect(img, save_dir, model, device, imgsz, conf_thres, iou_thres):
     img0 = img # origin image
     without_cnt = 0
 
@@ -47,10 +47,12 @@ def detect(img, save_dir, model, device, imgsz, conf_thres = 0.25, iou_thres = 0
 
     # Process detections
     for i, det in enumerate(pred):  # detections per image
-
-        save_path = f'{save_dir}/{int(t0)}.jpg' # img.jpg
-        txt_path = f'{save_dir}/{int(t0)}'
+        total = len(det)
+        save_path = f'{save_dir}/result.jpg' # img.jpg
+        txt_path = f'{save_dir}/result'
         s += '%gx%g ' % img.shape[2:]  # print string
+        with open(txt_path + '.txt', 'w') as f:
+            pass
         if len(det):
             # Rescale boxes from img_size to img size
             det[:, :4] = scale_coords(img.shape[2:], det[:, :4], img0.shape).round()
@@ -61,7 +63,6 @@ def detect(img, save_dir, model, device, imgsz, conf_thres = 0.25, iou_thres = 0
                 s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "
 
             # Write results
-            total = len(det)
             for *xyxy, conf, cls in reversed(det):
                 c = int(cls)  # integer class
                 xyxy2 = (torch.tensor(xyxy).view(1, 4)).view(-1).tolist()
@@ -72,9 +73,7 @@ def detect(img, save_dir, model, device, imgsz, conf_thres = 0.25, iou_thres = 0
 
                 label = f'{names[int(cls)]} {conf:.2f}'
                 plot_one_box(xyxy, img0, label=label, color=colors[int(cls)], line_thickness=3)
-        else:
-            with open(txt_path + '.txt', 'a') as f:
-                pass
+
 
         # Save results (image with detections)
         cv2.imwrite(save_path, img0)
